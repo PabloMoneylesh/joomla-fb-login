@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="2.5" method="upgrade">
+    <name>com_fblogin</name>
+    <author>PabloM</author>
+    <creationDate>04.04.2017</creationDate>
+    <copyright>2017</copyright>
+    <license>GNU/GPL v.3 or later.</license>
+    <authorEmail>sdfgasd@sxdgf</authorEmail>
+    <authoreUrl>dfhdfhgdfsh</authoreUrl>
+    <version>0.0.1</version>
+    <description>facebook login</description>
+
+
+    <files folder="site">
+        <filename>controller.php</filename>        
+        <filename>fblogin.php</filename>
+        
+    </files>
+	
+	<administration>
+		<!-- Administration Menu Section -->
+		
+		<!-- Administration Main File Copy Section -->
+		<!-- Note the folder attribute: This attribute describes the folder
+			to copy FROM in the package to install therefore files copied
+			in this section are copied from /admin/ in the package -->
+		<files folder="admin">		
+		</files>
+	</administration>
+
+</extension> 
