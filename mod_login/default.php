@@ -13,6 +13,10 @@ defined('_JEXEC') or die;
 JHtml::_('behavior.keepalive');
 require_once '/libraries/facebook_sdk/autoload.php';
 
+$currentUrl = JUri::getInstance()->toString(array('path')); 
+
+$currentUrl = urlencode($currentUrl);
+
 $fb = new Facebook\Facebook([
   'app_id' => '396348904069093',
   'app_secret' => '2dbc5b81cff242cb65a527afe12235af',
@@ -20,9 +24,9 @@ $fb = new Facebook\Facebook([
 ]);
 $helper = $fb->getRedirectLoginHelper();
 $permissions = ['email']; // optional
-$loginUrl = $helper->getLoginUrl('http://localhost/rupoland/component/fblogin', $permissions);
+$loginUrl = $helper->getLoginUrl('http://localhost/rupoland/component/fblogin?baseurl='.$currentUrl, $permissions);
 
-echo '<a href="' . $loginUrl . '">Log in with Facebook!</a>';
+
 ?>
 <?php if ($type == 'logout') : ?>
 <form action="<?php echo JRoute::_('index.php', true, $params->get('usesecure')); ?>" method="post" id="login-form">
@@ -44,6 +48,7 @@ echo '<a href="' . $loginUrl . '">Log in with Facebook!</a>';
 	</div>
 </form>
 <?php else : ?>
+<a href="<?php echo $loginUrl; ?>">Log in with Facebook!</a>
 <form action="<?php echo JRoute::_('index.php', true, $params->get('usesecure')); ?>" method="post" id="login-form" >
 	<?php if ($params->get('pretext')): ?>
 		<div class="pretext">
