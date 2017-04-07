@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die;
 
-class plgAuthenticationFblogin extends JPlugin
+class PlgAuthenticationFBlogin extends JPlugin
 {
 	/**
 	 * This method should handle any authentication and report back to the subject
@@ -26,15 +26,6 @@ class plgAuthenticationFblogin extends JPlugin
 	function onUserAuthenticate($credentials, $options, &$response)
 	{
 		
-        if(is_file(JPATH_ROOT . '/components/com_slogin/helpers/password.php')){
-            include_once JPATH_ROOT . '/components/com_slogin/helpers/password.php';
-        }
-        else{
-            $response->status = JAuthentication::STATUS_FAILURE;
-            $response->error_message = JText::sprintf('JLIB_USER_ERROR_AUTHENTICATION_FAILED_LOAD_PLUGIN', 'plgAuthenticationFBlogin');
-            return false;
-        }
-
 		$response->type = 'FBlogin';
 
 		// Joomla does not like blank passwords
@@ -56,8 +47,8 @@ class plgAuthenticationFblogin extends JPlugin
 
 		if ($uid)
 		{
-			$passwords = SloginPasswordHelper::getPasswords($uid);
-			$isPasswordValid = is_array($passwords) && in_array($credentials['password'], $passwords);
+			//$passwords = SloginPasswordHelper::getPasswords($uid);
+			//$isPasswordValid = is_array($passwords) && in_array($credentials['password'], $passwords);
 			$isPasswordValid = true;
 
 			if ($isPasswordValid)

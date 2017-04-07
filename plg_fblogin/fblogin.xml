@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="2.5" type="plugin" group="authentication" method="upgrade">
-	<name>FBLogin Auth</name>
+	<name>plg_authentication_fblogin</name>
 	<author>PabloM</author>
 	<creationDate>21.09.2017</creationDate>
 	<copyright>(C) 2012. All rights reserved.</copyright>

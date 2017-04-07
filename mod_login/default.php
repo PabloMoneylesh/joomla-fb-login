@@ -11,22 +11,21 @@
 defined('_JEXEC') or die;
 
 JHtml::_('behavior.keepalive');
-require_once '/libraries/facebook_sdk/autoload.php';
+require_once (JPATH_ROOT.'/libraries/facebook_sdk/autoload.php');
 
 $currentUrl = JUri::getInstance()->toString(array('path')); 
 
 $currentUrl = urlencode($currentUrl);
 
 $fb = new Facebook\Facebook([
-  'app_id' => '396348904069093',
-  'app_secret' => '2dbc5b81cff242cb65a527afe12235af',
+  'app_id' => '1832989900287917',
+  'app_secret' => '268c2b869a5e520347680701fd156c20',
   'default_graph_version' => 'v2.8',
 ]);
 $helper = $fb->getRedirectLoginHelper();
 $permissions = ['email']; // optional
-$loginUrl = $helper->getLoginUrl('http://localhost/rupoland/component/fblogin?baseurl='.$currentUrl, $permissions);
-
-
+$loginUrl = $helper->getLoginUrl(JUri::base().'component/fblogin?baseurl='.$currentUrl, $permissions);
+/*<a href="<?php echo $loginUrl; ?>">Log</a>*/
 ?>
 <?php if ($type == 'logout') : ?>
 <form action="<?php echo JRoute::_('index.php', true, $params->get('usesecure')); ?>" method="post" id="login-form">
@@ -48,7 +47,7 @@ $loginUrl = $helper->getLoginUrl('http://localhost/rupoland/component/fblogin?ba
 	</div>
 </form>
 <?php else : ?>
-<a href="<?php echo $loginUrl; ?>">Log in with Facebook!</a>
+
 <form action="<?php echo JRoute::_('index.php', true, $params->get('usesecure')); ?>" method="post" id="login-form" >
 	<?php if ($params->get('pretext')): ?>
 		<div class="pretext">
@@ -107,4 +106,5 @@ $loginUrl = $helper->getLoginUrl('http://localhost/rupoland/component/fblogin?ba
 	<?php endif; ?>
 	</fieldset>
 </form>
+<a href="<?php echo $loginUrl; ?>">Log</a>
 <?php endif; ?>

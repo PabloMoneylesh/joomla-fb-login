@@ -9,7 +9,7 @@
 
 defined('_JEXEC') or die;
 
-require_once '/libraries/facebook_sdk/autoload.php';
+require_once (JPATH_ROOT.'/libraries/facebook_sdk/autoload.php');
 
 /**
  * Content Component Controller
@@ -23,8 +23,8 @@ class FbLoginController extends JControllerForm
 	
 	function createFbContext(){
 		$fb = new Facebook\Facebook([
-		  'app_id' => '396348904069093', // Replace {app-id} with your app id
-		  'app_secret' => '2dbc5b81cff242cb65a527afe12235af',
+		  'app_id' => '1832989900287917', 
+		  'app_secret' => '268c2b869a5e520347680701fd156c20',
 		  'default_graph_version' => 'v2.8',
 		  ]);
 		  return $fb;
@@ -86,7 +86,7 @@ class FbLoginController extends JControllerForm
 		var_dump($tokenMetadata);*/
 
 		// Validation (these will throw FacebookSDKException's when they fail)
-		$tokenMetadata->validateAppId('396348904069093'); // Replace {app-id} with your app id
+		$tokenMetadata->validateAppId('1832989900287917'); // Replace {app-id} with your app id
 		// If you know the user ID this access token belongs to, you can validate it here
 		//$tokenMetadata->validateUserId('123');
 		$tokenMetadata->validateExpiration();
