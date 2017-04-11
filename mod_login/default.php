@@ -18,8 +18,8 @@ $currentUrl = JUri::getInstance()->toString(array('path'));
 $currentUrl = urlencode($currentUrl);
 
 $fb = new Facebook\Facebook([
-  'app_id' => '1832989900287917',
-  'app_secret' => '268c2b869a5e520347680701fd156c20',
+  'app_id' => '396348904069093',
+  'app_secret' => '2dbc5b81cff242cb65a527afe12235af',
   'default_graph_version' => 'v2.8',
 ]);
 $helper = $fb->getRedirectLoginHelper();
@@ -47,6 +47,13 @@ $loginUrl = $helper->getLoginUrl(JUri::base().'component/fblogin?baseurl='.$curr
 	</div>
 </form>
 <?php else : ?>
+<script >
+function open_popup(){
+	openwindow=window.open('<?php echo $loginUrl; ?>', 'LOGIN to FB', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=650,width=550');
+	openwindow.focus();
+}
+</script>
+<input type="button" name="FBLogin" class="button" value="Войти с Facebook" onclick="open_popup();return false;">
 
 <form action="<?php echo JRoute::_('index.php', true, $params->get('usesecure')); ?>" method="post" id="login-form" >
 	<?php if ($params->get('pretext')): ?>
@@ -106,5 +113,4 @@ $loginUrl = $helper->getLoginUrl(JUri::base().'component/fblogin?baseurl='.$curr
 	<?php endif; ?>
 	</fieldset>
 </form>
-<a href="<?php echo $loginUrl; ?>">Log</a>
 <?php endif; ?>

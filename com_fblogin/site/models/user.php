@@ -13,6 +13,19 @@ jimport('joomla.user.helper');
 
 class fbloginModelUser extends JModelItem
 {
+	public function checkUserExists($fbUser)
+	{
+		$db		= JFactory::getDbo();
+		$query	= $db->getQuery(true);
+
+		$query->select('id')
+			->from('#__users')
+			->where('email=' . $db->quote($fbUser['email']));
+		$uid = $db->setQuery($query,0,1)->loadResult();
+		
+		return $uid;
+	}
+	
 	
 	public function registerUser($fbUser)
 	{

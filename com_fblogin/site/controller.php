@@ -19,26 +19,27 @@ require_once (JPATH_ROOT.'/libraries/facebook_sdk/autoload.php');
 class FbLoginController extends JControllerForm
 {
 	
-	
-	
-	function createFbContext(){
-		$fb = new Facebook\Facebook([
-		  'app_id' => '1832989900287917', 
-		  'app_secret' => '268c2b869a5e520347680701fd156c20',
-		  'default_graph_version' => 'v2.8',
-		  ]);
-		  return $fb;
-	}
-	
 	public function login()
 	{
+		$app_id = "396348904069093";
+		$app_secret = "2dbc5b81cff242cb65a527afe12235af";
+		
+		$isError = false;
+	
+		if(!session_id()) {
+			session_start();
+		}
 		
 		$returnURL=JRequest::getVar( 'baseurl' );
 		
 		
 		$app = JFactory::getApplication();        
        
-		$fb = $this->createFbContext();
+		$fb = new Facebook\Facebook([
+		  'app_id' => $app_id, // Replace {app-id} with your app id
+		  'app_secret' => $app_secret,
+		  'default_graph_version' => 'v2.8',
+		  ]);
 		
 
 		$helper = $fb->getRedirectLoginHelper();
@@ -48,7 +49,7 @@ class FbLoginController extends JControllerForm
 		} catch(Facebook\Exceptions\FacebookResponseException $e) {
 		  // When Graph returns an error
 		  //echo 'Graph returned an error: ' . $e->getMessage();
-		  JError::raiseError('ERROR', 'Login FB Graph returned an error: '. $e->getMessage(), $e->getMessage());
+		  JError::raiseError('ERROR', 'Login FB Graph returned an error: '. $e->getMessage(), $e->getMessage());		  
 		  exit;
 		} catch(Facebook\Exceptions\FacebookSDKException $e) {
 		  // When validation fails or other local issues
@@ -59,7 +60,12 @@ class FbLoginController extends JControllerForm
 
 		if (! isset($accessToken)) {
 		  if ($helper->getError()) {
+			 if($helper->getErrorReason() == "user_denied") {
+				 JError::raiseError('ERROR', "Вам нужно пройти авторизацию, чтобы продолжить работу",$helper->getErrorReason());
+			 }
+			  
 			JError::raiseError('ERROR', "Error: " . $helper->getError() . " Error Reason: " . $helper->getErrorReason(),$helper->getError());
+			$isError = true;
 			/*header('HTTP/1.0 401 Unauthorized');
 			echo "Error: " . $helper->getError() . "\n";
 			echo "Error Code: " . $helper->getErrorCode() . "\n";
@@ -69,6 +75,7 @@ class FbLoginController extends JControllerForm
 			/*header('HTTP/1.0 400 Bad Request');
 			echo 'Bad request';*/
 			JError::raiseError('ERROR', "Error login via FB: Bad request","");
+			$isError = true;
 		  }
 		  exit;
 		}
@@ -86,7 +93,7 @@ class FbLoginController extends JControllerForm
 		var_dump($tokenMetadata);*/
 
 		// Validation (these will throw FacebookSDKException's when they fail)
-		$tokenMetadata->validateAppId('1832989900287917'); // Replace {app-id} with your app id
+		$tokenMetadata->validateAppId($app_id); // Replace {app-id} with your app id
 		// If you know the user ID this access token belongs to, you can validate it here
 		//$tokenMetadata->validateUserId('123');
 		$tokenMetadata->validateExpiration();
@@ -97,7 +104,7 @@ class FbLoginController extends JControllerForm
 			$accessToken = $oAuth2Client->getLongLivedAccessToken($accessToken);
 		  } catch (Facebook\Exceptions\FacebookSDKException $e) {
 			//echo "<p>Error getting long-lived access token: " . $helper->getMessage() . "</p>\n\n";
-			JError::raiseError('ERROR', "Error getting long-lived access token: " . $helper->getMessage(),$helper->getMessage());
+			JError::raiseError('ERROR', "Error getting long-lived access token: " . $helper->getMessage(),$helper->getMessage());			
 			exit;
 		  }
 
@@ -123,33 +130,56 @@ class FbLoginController extends JControllerForm
 		echo "<br>id:".$user->getId();
 		echo "<br>email:".$user['email'];*/
 		
+		
+		
+		if(!isset($user['email'])){
+			JError::raiseError('ERROR', "Вам нужно принять условие, на передау вашего e-mail адреса из Facebook","No e-mail received");
+			$isError = true;
+		}
+		
 		$usermodel	=$this->getModel( "user" );
-		$userCreationResult = $usermodel->registerUser($user);
 		
-		//echo "<br>userCreationResult: ".$userCreationResult;
-		
-		
-		/*if(! $userCreationResult instanceof JUser){
+		$uid = $usermodel->checkUserExists($user);
+		if($uid){
+			//echo "<br>uid: ".$uid;
+			 $juser = JFactory::getUser($uid);
+			 $credentials = array('username' => $juser->username, 'password' => $juser->email, 'email' => $juser->email);
 			
-			JError::raiseWarning('ERROR', $userCreationResult  ." - ". $user['email'], $user['email']);
-			return false;
-		}*/
+		}
+		else {
+				$userCreationResult = $usermodel->registerUser($user);
+				//echo "<br>userCreationResult: ".$userCreationResult;
+				/*New user registered*/
+				if($userCreationResult instanceof JUser){
+					//sent mail to admin
+					$config = JFactory::getConfig();
+				
+					$emailSubject = "Регострация на сайте RuPoland через Facebook";
+					$emailBody = "Вы зарегистрировались на сайте RuPoland.com с помощью Facebook. В дальнейшем для входа на сайт используйте вход через Facebook";
+				
+					try {
+						//$return = JFactory::getMailer()->sendMail($config->get('mailfrom'), $config->get('fromname'), $userCreationResult->get("email"), $emailSubject, $emailBody);				
+					} catch(Exception $e) {
+					
+					JError::raiseWarning('WARNING', "Ошибка отправки e-mail",$e);			
+				  }
+					
+				}
+				$credentials = array('username' => $user['email'], 'password' => $user['email'], 'email' => $user['email']);
+		}
 		
 		
+		$result = $app->login($credentials, array('component' => 'fblogin'));
+		/*echo "<p>login result:</p>";
+		var_dump($result);*/
 		
-		$credentials = array('username' => $user['email'], 'password' => $user['email']);
-		
-		
-		
-		$result = $app->login($credentials, array('action' => 'core.login.admin'));
-		//echo "<p>login error: " . $result . "</p>\n\n";
 		if (!($result instanceof Exception))
 		{
 			// Only redirect to an internal URL.
 			if (JUri::isInternal($return))
 			{
 				JError::raiseError('ERROR', "login error: " . $result, $result);
-				echo "<p>login error: " . $result . "</p>\n\n";
+				//echo "<p>login error: " . $result . "</p>\n\n";
 				/*// If &tmpl=component - redirect to index.php
 				if (strpos($return, "tmpl=component") === false)
 				{
@@ -162,7 +192,18 @@ class FbLoginController extends JControllerForm
 			}
 		}
 		//$authorisations = $authenticate->authorise($response, $options);
-		$app->redirect($returnURL);
+		//$app->redirect($returnURL);
+		echo "<p>You are logged in </p>";
+		echo "<script language='javascript' type='text/javascript'>";
+		//echo " window.opener.document.getElementById('имяпеременной').value=значение; "
+		echo " window.opener.focus(); ";
+		echo " window.opener.location.reload(); ";
+		if(!$isError){
+		echo " window.close(); ";
+		}
+		echo " </script>";
+ 
+
 		
 		return true;
 	}

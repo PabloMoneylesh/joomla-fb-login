@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die;
 
-class PlgAuthenticationFBlogin extends JPlugin
+class plgAuthenticationFblogin extends JPlugin
 {
 	/**
 	 * This method should handle any authentication and report back to the subject
@@ -25,7 +25,15 @@ class PlgAuthenticationFBlogin extends JPlugin
 	 */
 	function onUserAuthenticate($credentials, $options, &$response)
 	{
-		
+		//echo "onUserAuthenticate=".$options['component'];
+        if($options['component'] != "fblogin"){
+            return false;
+        }
+		if (JFactory::getApplication()->isAdmin())
+		{
+			return false;
+		}
+        
 		$response->type = 'FBlogin';
 
 		// Joomla does not like blank passwords
@@ -35,36 +43,28 @@ class PlgAuthenticationFBlogin extends JPlugin
 			$response->error_message = JText::_('JGLOBAL_AUTH_EMPTY_PASS_NOT_ALLOWED');
 			return false;
 		}
-		$userName =  $credentials['username'];		
+		$email =  $credentials['email'];		
 		// Get a database object
 		$db		= JFactory::getDbo();
 		$query	= $db->getQuery(true);
 
 		$query->select('id')
 			->from('#__users')
-			->where('username=' . $db->quote($userName));
+			->where('email=' . $db->quote($email));
 		$uid = $db->setQuery($query,0,1)->loadResult();
-
+		//echo "<br>".$uid;
+		
 		if ($uid)
-		{
-			//$passwords = SloginPasswordHelper::getPasswords($uid);
-			//$isPasswordValid = is_array($passwords) && in_array($credentials['password'], $passwords);
-			$isPasswordValid = true;
-
-			if ($isPasswordValid)
+		{			
+			if ($credentials['password'] == $credentials['email'])
 			{
+				//echo "<br> ok";
 				$user = JUser::getInstance($uid); // Bring this in line with the rest of the system
 				$response->email = $user->email;
-				$response->fullname = $user->name;
-
-				if (JFactory::getApplication()->isAdmin())
-				{
-					$response->language = $user->getParam('admin_language');
-				}
-				else
-				{
-					$response->language = $user->getParam('language');
-				}
+				$response->fullname = $user->name;				
+				
+				$response->language = $user->getParam('language');
+				
 				$response->status = JAuthentication::STATUS_SUCCESS;
 				$response->error_message = '';
 			}
